@@ -51,6 +51,14 @@ export const useTaskStore = defineStore('tasks', () => {
     })
   }
 
+  const updateTask = (id: number, updatedTitle: string) => {
+    const task = tasks.value.find((task) => task.id === id)
+
+    if (task) {
+      task.title = updatedTitle
+    }
+  }
+
   const toggleTask = (id: number) => {
     const task = tasks.value.find((task) => task.id === id)
 
@@ -88,6 +96,7 @@ export const useTaskStore = defineStore('tasks', () => {
     filteredTasks,
     completedTasks,
     pendingTasks,
+    updateTask,
     addTask,
     toggleTask,
     deleteTask,
