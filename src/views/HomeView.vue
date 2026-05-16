@@ -2,8 +2,12 @@
 import { useTaskStore } from '@/stores/taskStrore'
 import TaskForm from '@/components/TaskForm.vue'
 import TaskList from '@/components/TaskList.vue'
+import {onMounted} from 'vue'
 
 const taskStore = useTaskStore()
+onMounted(() => {
+  taskStore.loadTasks()
+})
 </script>
 
 <template>
@@ -41,7 +45,11 @@ const taskStore = useTaskStore()
       </button>
     </div>
 
-    <TaskList :tasks="taskStore.filteredTasks" />
+    <div v-if="taskStore.isLoading" class="loading">
+      Loading tasks...
+    </div>
+
+    <TaskList v-else :tasks="taskStore.filteredTasks" />
   </main>
 </template>
 
@@ -98,5 +106,12 @@ h1 {
 
 .filters button:hover {
   background-color: #e5e7eb;
+}
+
+.loading {
+  padding: 24px;
+  text-align: center;
+  font-size: 16px;
+  color: #6b7280;
 }
 </style>
