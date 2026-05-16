@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { Task } from '@/types/task'
 import { useLocalStorage } from '@/composibles/useLocalStorage'
+import { fetchTasks } from '@/services/taskService'
 
 export const useTaskStore = defineStore('tasks', () => {
   const storeTasks = localStorage.getItem('tasks');
@@ -9,6 +10,7 @@ export const useTaskStore = defineStore('tasks', () => {
   const tasks = ref<Task[]>(storeTasks ? JSON.parse(storeTasks) : [])
   const filter = ref<'all' | 'completed' | 'pending' | 'searchQuery'>('all')
   const searchQuery = ref('')
+  const isLoading = ref(false)
 
   const completedTasks = computed(() =>
     tasks.value.filter((task) => task.completed)
@@ -49,6 +51,14 @@ export const useTaskStore = defineStore('tasks', () => {
     })
   }
 
+  const updateTask = (id: number, updatedTitle: string) => {
+    const task = tasks.value.find((task) => task.id === id)
+
+    if (task) {
+      task.title = updatedTitle
+    }
+  }
+
   const toggleTask = (id: number) => {
     const task = tasks.value.find((task) => task.id === id)
 
@@ -61,15 +71,32 @@ export const useTaskStore = defineStore('tasks', () => {
     tasks.value = tasks.value.filter((task) => task.id !== id)
   }
 
+  const loadTasks = async () => {
+    try {
+      isLoading.value = true
+
+      const data = await fetchTasks()
+
+      tasks.value = data
+    } catch (error) {
+      console.error('Failed to load tasks', error)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
     useLocalStorage('tasks', tasks)
 
   return {
     tasks,
     filter,
     searchQuery,
+    isLoading,
+    loadTasks,
     filteredTasks,
     completedTasks,
     pendingTasks,
+    updateTask,
     addTask,
     toggleTask,
     deleteTask,
